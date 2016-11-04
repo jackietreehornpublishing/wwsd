@@ -1,11 +1,74 @@
+@tag "flask"
+@description "Add a funky movie title service sweet as a winning ticket for the lottery"
 editor AddMovieTitleService
 
-@description "A single parameter to this editor."
-@displayName "My Value"
-param my_value: .*
+precondition IsFlaskProject
 
-let sampleTemplateTemplate = "AddMovieTitleServiceTemplate.vm"
+@maxLength 21
+@description "The name of the project that will kick ass"
+@displayName "Kickass project name"
+@validInput "A valid Python name respecting usually Python conventions (PEP 423)."
+param project_name: "^[A-Za-z][-A-Za-z0-9_]+$"
 
-/* Example showing applying a simple template being applied */
-with project p
-  do merge sampleTemplateTemplate to "samplefile.txt"
+@description "Name of the app where to stick that service to"
+@displayName "Sweet app name"
+@validInput "A valid Python package name respecting PEP8."
+param app_name: "^[a-z][a-z0-9_]+$"
+
+@description "Endpoint your service will call"
+@displayName "Endpoint"
+@validInput "A URL path."
+param endpoint: "^/.*"
+
+
+let model = "models.py.mustache"
+let test_model = "test_models.py.mustache"
+let handler = """
+
+@the_app_app.route('/movie_endpoint')
+def title() -> str:
+    return jsonify(Movie.one())
+"""
+let test_handler = """
+
+def test_my_app_title(client):
+    with patch('flask_service.my_app.models.movies') as movies:
+        movies.__next__.return_value = 'hello dude'
+        res = client.get(url_for('my_app_app.title'))
+        assert json.loads(res.data.decode('utf-8')) == 'hello dude'
+"""
+
+
+with project
+begin
+   do merge model to {project_name + "/" + app_name + "/models.py"}
+   do merge test_model to {project_name + "/" + app_name + "/tests/test_models.py"}
+end
+
+# Update the application views with our new handler
+with file f when f.path = {project_name + "/" + app_name + "/views.py"}
+begin
+   do append handler
+   do regexpReplace "from flask import Blueprint" """from flask import Blueprint
+from flask_service.my_app.models import Movie"""
+   do regexpReplace "from flask import Blueprint" """from flask import Blueprint, jsonify"""
+   do replace "/movie_endpoint" endpoint
+end
+
+# Update the tests for the handler
+with file f when f.path = {project_name + "/" + app_name + "/tests/test_views.py"}
+begin
+   do append test_handler
+   do regexpReplace "from flask import url_for" """import json
+from unittest.mock import patch
+
+from flask import url_for
+"""
+end
+
+with file f when f.path.endsWith ".py"
+begin
+   do replace "flask_service" project_name
+   do replace "my_app" app_name
+   do replace "the_app" app_name
+end
