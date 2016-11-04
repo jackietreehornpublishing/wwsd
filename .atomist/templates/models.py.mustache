@@ -1,0 +1,40 @@
+# -*- coding: utf-8 -*-
+from itertools import cycle
+import random
+
+__all__ = ['Movie']
+
+movies = cycle([
+    'Aladdin meets The Luscious Apes',
+    'Blood Nuns',
+    'Captain Fear, The Final Showdown',
+    'Dark Passion, Part IV',
+    'Fascination and Pestilence',
+    'He was a Futuristic Paul Bunyan',
+    'Heart of the Healer',
+    'I Married Zorro',
+    'I was a teenaged Caligula',
+    'I was an Atom-age Jack the Ripper',
+    'Love Festival',
+    'My Dad Married Medusa',
+    'The Deadly Kiss of The Fear Brood',
+    'The Jungle',
+    'The Murderous Touch of Lizzie Borden',
+    'The Mystery of James Smith',
+    'The Scorpion-Man in San Francisco',
+    'Zombie Siege 1960'
+])
+
+
+class Movie:
+    @staticmethod
+    def one() -> str:
+        """
+        Return a new movie title.
+        """
+        # let's fake random failures
+        if random.randint(0, 1):
+            raise RuntimeError("borked")
+
+        # return one of the movie title
+        return next(movies)

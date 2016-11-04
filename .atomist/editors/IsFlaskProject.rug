@@ -1,0 +1,4 @@
+@description "Only work on projects that run a Flask application"
+predicate IsFlaskProject
+  with project p
+    when { p.fileContains("requirements.txt", "flask") }

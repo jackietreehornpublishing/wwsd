@@ -1,0 +1,11 @@
+# -*- coding: utf-8 -*-
+from unittest.mock import patch
+
+from {{project_name}}.{{app_name}}.models import Movie
+
+
+def test_movies(client):
+    with patch("flask_service.my_app.models.movies") as movies:
+        movies.__next__.return_value = 'hi there'
+        assert Movie.one() == 'hi there'
+
