@@ -1,6 +1,6 @@
-wwsd
+What would Sylvain do?
 ===========================
 
 Originally created on 2016-11-04.
 
-My new project
+Probably, if anything, he'd do it reticently ;)
